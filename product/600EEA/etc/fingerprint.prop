@@ -1,0 +1,7 @@
+#### add 600EEA fingerprint properties###
+ro.product.model.num=00EEA
+ro.product.system.name=Sentry_00EEA
+ro.product.system_ext.name=Sentry_00EEA
+ro.product.product.name=Sentry_00EEA
+ro.build.product.name=Sentry_00EEA
+ro.build.version.base_os=

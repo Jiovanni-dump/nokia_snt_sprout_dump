@@ -1,0 +1,5 @@
+#line 1 "vendor/hmd/apps/hmdenterpriseapi/sepolicy/sepolicy/service_contexts"
+HMDEnterpriseService    u:object_r:hmd_service:s0
+# Start of [APO-3245] [simlock][wenxia.hu]HMD Remote Lock solution with Softlock
+hmdremotelock    u:object_r:hmd_service:s0
+# End of [APO-3245] [simlock][wenxia.hu]HMD Remote Lock solution with Softlock
