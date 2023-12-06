@@ -1,0 +1,21 @@
+service diag_v_atc /vendor/bin/diag_v_atc
+    class late_start
+    user root
+    group root oem_2901 system bluetooth drmrpc vendor_qti_diag shell
+    oneshot
+
+on property:ro.serialno=*
+    setprop vendor.debug.serialno ${ro.serialno}
+
+service ft_vendor_exe_sys /vendor/bin/factory_vendor_exe_system_shell.sh
+    class late_start
+    user root
+    group root system shell
+    disabled
+    oneshot
+
+on property:persist.vendor.usb.config=*
+    setprop persist.sys.usb.factory2.func ${persist.vendor.usb.config}
+
+on property:persist.vendor.usb.config=* && property:ro.bootmode=factory2
+    setprop sys.usb.config ${persist.vendor.usb.config}

@@ -1,0 +1,12 @@
+#
+# preload color config (QDCM)
+#
+service vendor.preload-cc-sh /vendor/bin/init.preload.colorconfig.sh
+    class late_start
+    user root
+    group system graphics
+    oneshot
+    disabled
+
+on post-fs-data
+    start vendor.preload-cc-sh
