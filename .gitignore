@@ -1,0 +1,11 @@
+system/system/framework/framework-res.apk
+system/system/priv-app/HMDCamera/HMDCamera.apk
+product/app/WebViewGoogle/WebViewGoogle.apk
+product/app/Messages/Messages.apk
+product/app/Photos/Photos.apk
+product/app/WallpaperPicker_snt/WallpaperPicker_snt.apk
+product/priv-app/Velvet/Velvet.apk
+product/priv-app/GmsCore/GmsCore.apk
+vendor/etc/camera/vidhance.lic
+modem.img
+system_ext/apex/com.android.vndk.v30.apex
