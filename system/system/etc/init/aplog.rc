@@ -1,0 +1,235 @@
+on post-fs-data
+    # add aplog dir
+    mkdir /data/local 0751 system system
+    mkdir /data/local/newlog 0771 system system
+    mkdir /data/local/newlog/aplog 0777 system system
+    mkdir /data/local/newlog/aplog/logcats 0777 system system
+    mkdir /data/local/newlog/curlog 0777 system system
+    mkdir /persist/flag 0770 system system
+    # for modem log
+    mkdir /data/local/newlog/mdlog 0771 system system
+    chmod 666 /dev/diag
+    #for adsp log
+    mkdir data/local/newlog/adsplog 0771 system system
+    # for ap wakeup source log
+    write /sys/module/msm_show_resume_irq/parameters/debug_mask 1
+    mkdir data/local/newlog/aplog/bugreports 0771 system system
+
+
+    #add ontim log
+    chown root shell system/etc/savelogs.sh
+    chmod 0777 system/etc/savelogs.sh
+
+    chown root shell system/etc/kernellog.sh
+    chmod 0777 system/etc/kernellog.sh
+
+    chown root shell system/etc/aplog.sh
+    chmod 0777 system/etc/aplog.sh
+
+    chown root shell system/etc/copy_aplog.sh
+    chmod 0777 system/etc/copy_aplog.sh
+
+    chown root shell system/etc/clean_aplog.sh
+    chmod 0777 system/etc/clean_aplog.sh
+
+    chown root shell system/etc/stop_aplog.sh
+    chmod 0777 system/etc/stop_aplog.sh
+
+    chown root shell system/etc/catch_aplog.sh
+    chmod 0777 system/etc/catch_aplog.sh
+
+    chown root shell system/etc/auto_save_stop_aplog.sh
+    chmod 0777 system/etc/auto_save_stop_aplog.sh
+
+    chown root shell system/etc/modemlog.sh
+    chmod 0777 system/etc/modemlog.sh
+
+    chown root shell system/etc/modemlog_setup.sh
+    chmod 0777 system/etc/modemlog_setup.sh
+
+    chown root shell system/etc/tcpDumplog.sh
+    chmod 0777 system/etc/tcpDumplog.sh
+
+    chown root shell system/etc/adsplog.sh
+    chmod 0777 system/etc/adsplog.sh
+
+    chown root shell system/etc/adsplog_setup.sh
+    chmod 0777 system/etc/adsplog_setup.sh
+
+    chown root shell system/etc/tcpDumplog.sh
+    chmod 0777 system/etc/tcpDumplog.sh
+
+on property:persist.sys.dloadmode.config=1
+    write /sys/module/qpnp_power_on/parameters/emergent_restart 1
+    write /sys/module/msm_poweroff/parameters/download_mode 1
+    setprop persist.sys.ssr.restart_level ALL_DISABLE
+
+on property:persist.sys.dloadmode.config=0
+    write /sys/module/qpnp_power_on/parameters/emergent_restart 0
+    write /sys/module/msm_poweroff/parameters/download_mode 0
+    setprop persist.sys.ssr.restart_level ALL_ENABLE
+
+#add for aplog service
+service mainlog system/bin/logcat_ontim -b main -b system -b crash -v threadtime -r 4096 -n 5000 -f /data/local/newlog/aplog/logcats/logcat.log
+    class late_start
+    user system
+    group system root log
+    disabled
+
+# add for record more logcat info
+service mainlog_big system/bin/logcat_ontim -b main -b system -b crash -r 4096 -n 5000 -v threadtime -f /data/local/newlog/aplog/logcats/logcat.log
+    class late_start
+    user system
+    group system root log
+    disabled
+
+service radiolog system/bin/logcat_ontim -b radio -r 2048 -n 5000 -v threadtime -f /data/local/newlog/aplog/logcats/radio.log "AT:S *:V"
+    class late_start
+    user system
+    group system root log
+    disabled
+
+# add for record more logcat info
+service radiolog_big system/bin/logcat_ontim -b radio -r 2048 -n 5000 -v threadtime -f /data/local/newlog/aplog/logcats/radio.log "AT:S *:V"
+    class late_start
+    user system
+    group system root log
+    disabled
+
+service eventslog system/bin/logcat_ontim -b events -r 2048 -n 5000 -v threadtime -f /data/local/newlog/aplog/logcats/events.log "AT:S *:V"
+    class late_start
+    user system
+    group system root log
+    disabled
+
+service eventslog_big system/bin/logcat_ontim -b events -r 4096 -n 5000 -v threadtime -f /data/local/newlog/aplog/logcats/events.log "AT:S *:V"
+    class late_start
+    user system
+    group system root log
+    disabled
+
+# add by wangwq14 to close chatty in logcat
+service closechatty system/bin/logcat_ontim -P "" -b all
+    class late_start
+    user system
+    group system root log
+    disabled
+    oneshot
+
+# add for record tcpDump log via tcpDumplog
+service tcpDumplog system/etc/tcpDumplog.sh
+    class main
+    disabled
+    oneshot
+    seclabel u:r:ontimlogs:s0
+
+# add for record kernel log via dmesg
+service kernellog system/etc/kernellog.sh
+    class late_start
+    disabled
+    oneshot
+    seclabel u:r:ontimlogs:s0
+
+service qseelog_setup system/etc/qseelog_setup.sh
+     class late_start
+     oneshot
+     seclabel u:r:ontimlogs:s0
+
+service aplog_setup system/etc/aplog.sh
+    class late_start
+    oneshot
+    seclabel u:r:ontimlogs:s0
+
+service copyaplog system/etc/copy_aplog.sh
+    class late_start
+    user system
+    group system root log sdcard_rw
+    disabled
+    oneshot
+
+service cleanaplog system/etc/clean_aplog.sh
+    class late_start
+    user root
+    group system root log sdcard_rw
+    disabled
+    oneshot
+    seclabel u:r:ontimlogs:s0
+service stopaplog system/etc/stop_aplog.sh
+    class late_start
+    disabled
+    oneshot
+    seclabel u:r:ontimlogs:s0
+
+# Add by wangwq14 for catch current log service
+service catchaplog system/etc/catch_aplog.sh
+    class main
+    user shell
+    group system root log sdcard_rw
+    disabled
+    oneshot
+
+service assalog system/etc/auto_save_stop_aplog.sh
+    class late_start
+    disabled
+    oneshot
+    seclabel u:r:ontimlogs:s0
+
+service diag_mdlog_system_start /system/bin/diag_mdlog_system
+    class late_start
+    user shell
+    group system oem_2901 sdcard_rw sdcard_r media_rw
+    disabled
+    oneshot
+
+service diag_mdlog_system_stop /system/bin/diag_mdlog_system -k
+    class late_start
+    user shell
+    group system oem_2901 sdcard_rw sdcard_r media_rw
+    disabled
+    oneshot
+
+service modemlog system/etc/modemlog.sh
+    class late_start
+    user shell
+    group system oem_2901 sdcard_rw sdcard_r media_rw
+    disabled
+    oneshot
+
+service modemlog_setup system/etc/modemlog_setup.sh
+    class late_start
+    user shell
+    group system oem_2901 sdcard_rw sdcard_r media_rw
+    disabled
+    oneshot
+
+# add for record adsp sensor log via adsplog
+service adsplog system/etc/adsplog.sh
+    class late_start
+    user shell
+    group system oem_2901 sdcard_rw sdcard_r media_rw
+    disabled
+    oneshot
+
+service adsplog_setup system/etc/adsplog_setup.sh
+    class late_start
+    user shell
+    group system oem_2901 sdcard_rw sdcard_r media_rw
+    disabled
+    oneshot
+
+on property:persist.sys.aplogsettings=true && property:vold.post_fs_data_done=1
+    start aplog_setup
+	start modemlog_setup
+	start adsplog_setup
+	
+on property:persist.sys.aplogsettings=false
+    start stopaplog
+
+on property:persist.sys.cleanlog=yes
+     start cleanaplog
+
+on property:persist.sys.collectlog=yes
+    start copyaplog
+
+on property:persist.sys.catch.bugreport=true
+    start catchaplog
